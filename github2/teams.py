@@ -17,6 +17,16 @@ class Teams(GithubCommand):
     """ Github command for operating on teams """
     domain = "teams"
 
+    def add_member(self, team_id, username):
+        """Adds a member to a team."""
+        return self.make_request(str(team_id), "members", method="POST",
+                                 post_data={'name': username})
+
+    def remove_member(self, team_id, username):
+        """Removes a member from a team."""
+        return self.make_request(str(team_id), "members", method="DELETE",
+                                 post_data={'name': username})
+
     def members(self, team_id):
         """ Returns the list of members of a team """
         return self.get_values(str(team_id), "members", filter="users", 
