@@ -71,6 +71,11 @@ class GithubRequest(object):
         path_components = filter(None, path_components)
         return self.make_request("/".join(path_components))
 
+    def delete(self, *path_components, **extra_post_data):
+        path_components = filter(None, path_components)
+        return self.make_request("/".join(path_components), extra_post_data,
+            method="DELETE")
+
     def post(self, *path_components, **extra_post_data):
         path_components = filter(None, path_components)
         return self.make_request("/".join(path_components), extra_post_data,
@@ -114,8 +119,8 @@ class GithubRequest(object):
         response = connection.getresponse()
         response_text = response.read()
         if self.debug:
-            sys.stderr.write("URL:[%s] POST_DATA:%s RESPONSE_TEXT: [%s]\n" % (
-                                path, post_data, response_text))
+            sys.stderr.write("URL:[%s] METHOD:%s BODY:%s RESPONSE_TEXT: [%s]\n" % (
+                                path, method, post_data, response_text))
         if response.status >= 400:
             raise RuntimeError("unexpected response from github.com %d: %r" % (
                                response.status, response_text))
