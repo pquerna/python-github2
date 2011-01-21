@@ -25,7 +25,7 @@ class Teams(GithubCommand):
     def remove_member(self, team_id, username):
         """Removes a member from a team."""
         return self.make_request(str(team_id), "members", method="DELETE",
-                                 post_data={'name': username})
+                                 query={'name': username})
 
     def members(self, team_id):
         """ Returns the list of members of a team """

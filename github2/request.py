@@ -67,21 +67,21 @@ class GithubRequest(object):
         post_data.update(extra_post_data)
         return urlencode(post_data)
 
-    def get(self, *path_components):
+    def get(self, *path_components, **kwargs):
         path_components = filter(None, path_components)
-        return self.make_request("/".join(path_components))
+        return self.make_request("/".join(path_components), query=kwargs.get('query'))
 
-    def delete(self, *path_components, **extra_post_data):
+    def delete(self, *path_components, **kwargs):
         path_components = filter(None, path_components)
-        return self.make_request("/".join(path_components), extra_post_data,
-            method="DELETE")
+        return self.make_request("/".join(path_components),
+               method="DELETE", query=kwargs.get('query'))
 
     def post(self, *path_components, **extra_post_data):
         path_components = filter(None, path_components)
         return self.make_request("/".join(path_components), extra_post_data,
             method="POST")
 
-    def make_request(self, path, extra_post_data=None, method="GET"):
+    def make_request(self, path, query=None, extra_post_data=None, method="GET"):
         if self.delay:
             since_last = (datetime.datetime.now() - self.last_request)
             since_last_in_seconds = (since_last.days * 24 * 60 * 60) + since_last.seconds + (since_last.microseconds/1000000.0)
@@ -92,15 +92,17 @@ class GithubRequest(object):
                 time.sleep(duration)
 
         extra_post_data = extra_post_data or {}
+        query = query or {}
         url = "/".join([self.url_prefix, path])
-        result = self.raw_request(url, extra_post_data, method=method)
+
+        result = self.raw_request(url, extra_post_data, query, method=method)
 
         if self.delay:
             self.last_request = datetime.datetime.now()
         return result
 
-    def raw_request(self, url, extra_post_data, method="GET"):
-        scheme, netloc, path, params, query, fragment = urlparse(url)
+    def raw_request(self, url, extra_post_data, query, method="GET"):
+        scheme, netloc, path, params, uquery, fragment = urlparse(url)
         hostname = netloc.split(':')[0]
         post_data = None
         headers = self.http_headers
@@ -111,7 +113,7 @@ class GithubRequest(object):
             headers["Content-Length"] = str(len(post_data))
         else:
             path = urlunparse((scheme, netloc, path, params,
-                self.encode_authentication_data(parse_qs(query)),
+                self.encode_authentication_data(query),
                 fragment))
         connector = self.connector_for_scheme[scheme]
         connection = connector(hostname)

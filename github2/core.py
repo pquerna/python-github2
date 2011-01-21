@@ -35,12 +35,13 @@ class GithubCommand(object):
         filter = kwargs.get("filter")
         post_data = kwargs.get("post_data") or {}
         method = kwargs.get("method", "GET")
-        if post_data or method != "GET":
-            func = getattr(self.request, method.lower())
-            response = func(self.domain, command, *args,
+        query = kwargs.get("query", None)
+        func = getattr(self.request, method.lower())
+        if post_data:
+            response = func(self.domain, command, *args, query=query,
                                          **post_data)
         else:
-            response = self.request.get(self.domain, command, *args)
+            response = func(self.domain, command, *args, query=query)
         if filter:
             return response[filter]
         return response
