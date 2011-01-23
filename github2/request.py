@@ -76,10 +76,10 @@ class GithubRequest(object):
         return self.make_request("/".join(path_components),
                method="DELETE", query=kwargs.get('query'))
 
-    def post(self, *path_components, **extra_post_data):
+    def post(self, *path_components, **kwargs):
         path_components = filter(None, path_components)
-        return self.make_request("/".join(path_components), extra_post_data,
-            method="POST")
+        return self.make_request("/".join(path_components), extra_post_data=kwargs,
+            method="POST", query=kwargs.pop('query', None))
 
     def make_request(self, path, query=None, extra_post_data=None, method="GET"):
         if self.delay:
